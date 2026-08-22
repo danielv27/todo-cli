@@ -1,97 +1,74 @@
 # todo-cli
 
 [![CI](https://github.com/danielv27/todo-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/danielv27/todo-cli/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-MIT-5B5BD6?style=flat-square)](https://opensource.org/licenses/MIT)
 
-A simple command-line tool written in Go to manage TODOs in a plain markdown file, using GitHub-style checkbox syntax (`- [ ]` / `- [x]`). Works great as a companion to Obsidian, Logseq, or any other markdown-based notes app — but it doesn't require one.
+A fast, no-nonsense TODO manager that lives in a single markdown file. No database, no sync service, no app — just `- [ ]` checkboxes you can grep, diff, and edit by hand whenever you want. Pairs naturally with Obsidian, Logseq, or a plain `todo.md`, but doesn't care which.
 
-## Features
-- Add, list, complete, un-complete, remove, and clear TODO items from the command line.
-- Each TODO gets a short, stable ID so you can reference it later, or match by a unique substring of its text instead.
-- Color-coded `list` output: done items in green, pending items in red.
+## ✨ Features
 
-## Setup
+- ➕ **Add** tasks from the command line, no editor required
+- ✅ **Check off / un-check** tasks by ID or by typing a bit of the text
+- 🗑️ **Remove** tasks the same way
+- 📋 **List** everything with color-coded status (green ✔ done, red ✘ pending)
+- 🧹 **Clear** the whole list (with a confirmation prompt, so you don't nuke it by accident)
+- 🪶 Zero config to get started, one env var if you want a different file
 
-### 1. Clone the Repository
-```sh
-git clone https://github.com/danielv27/todo-cli.git
-cd todo-cli
+## How it works
+
+**IDs.** Every task gets a 4-character ID, derived from a SHA-1 hash of the task text plus the current line count in the file (used as a salt so identical text on different lines doesn't collide):
+
+```
+- [ ] [id:9f3a] Buy groceries
 ```
 
-### 2. Initialize Go Modules (if not already done)
+**Matching.** Every command that targets an existing task (`done`, `undone`, `remove`) accepts either the ID or a plain substring of the task text:
+
 ```sh
-go mod tidy
+todo done 9f3a          # exact, by ID
+todo done groceries     # by substring — works if it's unique
 ```
 
-### 3. Build the Binary
+If your substring matches more than one task, nothing gets touched — the CLI tells you to be more specific or use the ID instead. No silent wrong-task edits.
+
+## Install
+
 ```sh
+git clone https://github.com/danielv27/todo-cli.git && cd todo-cli
 go build -o todo
-```
-
-### 4. Make the Binary Globally Accessible
-Move the binary to a directory in your `PATH`, such as:
-```sh
-# For your user only (no sudo required):
-mv ./todo ~/.local/bin/
-# Or for all users (requires sudo):
-sudo mv ./todo /usr/local/bin/
-```
-Make sure the directory is in your `PATH`.
-
-After this, you can run the CLI tool from any terminal session by simply typing:
-```sh
-todo add "Your task here"
+mv ./todo ~/.local/bin/   # or /usr/local/bin, or anywhere on your PATH
 ```
 
 ## Usage
 
-### Add a TODO
 ```sh
 todo add Buy groceries and pick up the mail
-```
-This appends a line like:
-```
-- [ ] [id:1a2b] Buy groceries and pick up the mail
-```
-to your TODO file.
+# → - [ ] [id:9f3a] Buy groceries and pick up the mail
 
-### List TODOs
-```sh
 todo list
+todo done 9f3a
+todo done groceries      # substring match works too
+todo undone 9f3a
+todo remove 9f3a
+todo clear               # asks for confirmation first
 ```
-
-### Mark a TODO as done / not done
-```sh
-todo done 1a2b
-todo done groceries   # matches by unique substring instead of ID
-todo undone 1a2b
-```
-
-### Remove a TODO
-```sh
-todo remove 1a2b
-todo remove groceries
-```
-
-### Clear the entire list
-```sh
-todo clear
-```
-You'll be asked to confirm before the file is wiped.
 
 ## Configuration
 
-By default, TODOs are read from and written to `~/todo.md`. To use a different file, set the `TODO_CLI_FILE` environment variable:
+Defaults to `~/todo.md`. Point it elsewhere with:
+
 ```sh
 export TODO_CLI_FILE="$HOME/Documents/Obsidian Vault/todo.md"
 ```
-Add that line to your shell profile (`.bashrc`, `.zshrc`, etc.) to make it persistent.
 
 ## Requirements
-- Go 1.24 or newer
-- [Cobra CLI](https://github.com/spf13/cobra) (for development)
+
+Go 1.24+
 
 ## Contributing
-Pull requests and suggestions are welcome!
+
+PRs welcome.
 
 ## License
+
 MIT
