@@ -46,36 +46,18 @@ If multiple TODOs match the provided text, none will be removed and you will nee
 		}
 
 		lines := strings.Split(string(input), "\n")
-		matchIdx := -1
-		matchCount := 0
 
-		// Try to match by ID
-		for i, line := range lines {
-			if strings.Contains(line, "[id:"+idOrText+"]") {
-				matchIdx = i
-				matchCount = 1
-				break
+		matchIdx := findByID(lines, idOrText)
+		if matchIdx == -1 {
+			var count int
+			matchIdx, count = findBySubstring(lines, idOrText, "- [ ] ", "- [x] ")
+			if count == 0 {
+				fmt.Printf("No TODO found that matches: %s\n", idOrText)
+				return
+			} else if count > 1 {
+				fmt.Println("Multiple TODOs match the given text. Please be more specific or use the ID.")
+				return
 			}
-		}
-
-		// If not found by ID, try to match by substring in the TODO text
-		if matchCount == 0 {
-			for i, line := range lines {
-				if strings.Contains(line, idOrText) && (strings.Contains(line, "- [ ] ") || strings.Contains(line, "- [x] ")) {
-					if matchIdx == -1 {
-						matchIdx = i
-					}
-					matchCount++
-				}
-			}
-		}
-
-		if matchCount == 0 {
-			fmt.Printf("No TODO found that matches: %s\n", idOrText)
-			return
-		} else if matchCount > 1 {
-			fmt.Println("Multiple TODOs match the given text. Please be more specific or use the ID.")
-			return
 		}
 
 		// Remove the matched line

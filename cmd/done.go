@@ -47,44 +47,26 @@ If multiple TODOs match the provided text, none will be marked as done and you w
 
 		lines := strings.Split(string(input), "\n")
 		found := false
-		alreadyDone := false
-		matchIdx := -1
-		matchCount := 0
 
-		// First, try to match by ID
-		for i, line := range lines {
-			if strings.Contains(line, "[id:"+idOrText+"]") {
-				if strings.Contains(line, "- [ ] ") {
-					lines[i] = strings.Replace(line, "- [ ] ", "- [x] ", 1)
-					found = true
-					break
-				} else if strings.Contains(line, "- [x] ") {
-					alreadyDone = true
-					break
-				}
-			}
-		}
-
-		// If not found by ID, try to match by substring in the TODO text
-		if !found && !alreadyDone {
-			for i, line := range lines {
-				if strings.Contains(line, "- [ ] ") && strings.Contains(line, idOrText) {
-					matchIdx = i
-					matchCount++
-				}
-			}
-			if matchCount == 1 {
-				lines[matchIdx] = strings.Replace(lines[matchIdx], "- [ ] ", "- [x] ", 1)
+		if idx := findByID(lines, idOrText); idx != -1 {
+			switch {
+			case strings.Contains(lines[idx], "- [ ] "):
+				lines[idx] = strings.Replace(lines[idx], "- [ ] ", "- [x] ", 1)
 				found = true
-			} else if matchCount > 1 {
+			case strings.Contains(lines[idx], "- [x] "):
+				fmt.Println("TODO already set to done.")
+				return
+			}
+		} else {
+			idx, count := findBySubstring(lines, idOrText, "- [ ] ")
+			if count > 1 {
 				fmt.Println("Multiple TODOs match the given text. Please be more specific or use the ID.")
 				return
 			}
-		}
-
-		if alreadyDone {
-			fmt.Println("TODO already set to done.")
-			return
+			if count == 1 {
+				lines[idx] = strings.Replace(lines[idx], "- [ ] ", "- [x] ", 1)
+				found = true
+			}
 		}
 
 		if !found {

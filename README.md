@@ -1,5 +1,7 @@
 # todo-cli
 
+[![CI](https://github.com/danielv27/todo-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/danielv27/todo-cli/actions/workflows/ci.yml)
+
 A simple command-line tool written in Go to manage TODOs in a plain markdown file, using GitHub-style checkbox syntax (`- [ ]` / `- [x]`). Works great as a companion to Obsidian, Logseq, or any other markdown-based notes app — but it doesn't require one.
 
 ## Features
